@@ -14,11 +14,16 @@ import {
   createBrowserRouter,
   RouterProvider
 } from "react-router-dom";
+import NotificationsFeedPage from './pages/NotificationsFeedPage copy';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomeFeedPage />
+  },
+  {
+    path: "/notifications",
+    element: <NotificationsFeedPage />
   },
   {
     path: "/@:handle",
