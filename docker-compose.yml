@@ -13,21 +13,32 @@ services:
   frontend-react-js:
     environment:
       REACT_APP_BACKEND_URL: http://localhost:4567
+      REACT_APP_AWS_PROJECT_REGION: "${AWS_DEFAULT_REGION}"
+      REACT_APP_AWS_COGNITO_REGION: "${AWS_DEFAULT_REGION}"
+      REACT_APP_AWS_USER_POOLS_ID: "us-east-1_5yDQJgOVn	"
+      REACT_APP_CLIENT_ID: "girpa54d2qrrifm36nlcfjfjk"
     build: ./frontend-react-js
     ports:
       - "3000:3000"
     volumes:
       - ./frontend-react-js:/frontend-react-js
 
-  # dynamodb-local:
-  #   command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
-  #   image: "amazon/dynamodb-local:latest"
-  #   container_name: dynamodb-local
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - "./docker/dynamodb:/home/dynamodblocal/data"
-  #   working_dir: /home/dynamodblocal
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  
+  postgres:
+    image: postgres:16.1-alpine3.19
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
 networks:
   internal-network:
     driver: bridge
