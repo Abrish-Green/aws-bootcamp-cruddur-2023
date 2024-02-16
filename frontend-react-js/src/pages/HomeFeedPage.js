@@ -7,7 +7,7 @@ import ActivityFeed from '../components/ActivityFeed';
 import ActivityForm from '../components/ActivityForm';
 import ReplyForm from '../components/ReplyForm';
 
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 
 export default function HomeFeedPage() {
   const [activities, setActivities] = React.useState([]);
@@ -33,8 +33,9 @@ export default function HomeFeedPage() {
       console.log(err);
     }
   };
-
+  console.log()
   const checkAuth = async () => {
+    
     getCurrentUser({
       // Optional, By default is false. 
       // If set to true, this call will send a 
@@ -43,11 +44,14 @@ export default function HomeFeedPage() {
     })
     .then((user) => {
       console.log('user',user);
-      return getCurrentUser()
+      fetchUserAttributes()
+      return fetchUserAttributes()
     }).then((cognito_user) => {
+        console.log(cognito_user)
+       
         setUser({
-          display_name: cognito_user.attributes.name,
-          handle: cognito_user.attributes.preferred_username
+          display_name: cognito_user.name,
+          handle: cognito_user.preferred_username
         })
     })
     .catch((err) => console.log(err));
