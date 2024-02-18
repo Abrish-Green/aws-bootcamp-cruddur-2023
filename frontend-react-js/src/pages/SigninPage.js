@@ -2,7 +2,7 @@ import "./SigninPage.css";
 import React, { useEffect } from "react";
 import { ReactComponent as Logo } from "../components/svg/logo.svg";
 import { Link } from "react-router-dom";
-import { getCurrentUser } from 'aws-amplify/auth'
+import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 
 // [TODO] Authenication
 import { signIn } from "aws-amplify/auth";
@@ -11,33 +11,34 @@ export default function SigninPage() {
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState("");
   const [cognitoErrors, setCognitoErrors] = React.useState("");
-  
+
   useEffect(() => {
-    getCurrentUser().then((user) => user ? window.location.href = '/' : null )
-  }, [])
+    getCurrentUser().then((user) => {
+      if (user) {
+        window.location.href = "/";
+      }
+    });
+  }, []);
   const onsubmit = async (event) => {
     setCognitoErrors("");
     event.preventDefault();
     try {
       signIn({ username: email, password })
-        .then((user) => {
-          console.log(user)
-          localStorage.setItem(
-            "access_token",
-            user.signInUserSession.accessToken.jwtToken
-          );
+        .then(async (user) => {
+          const session = await fetchAuthSession();
+          const access_token = session.tokens.accessToken.toString();
+          localStorage.setItem("access_token", access_token);
           window.location.href = "/";
         })
         .catch((err) => {
-          
           setErrors(err.message);
-          if(err.message.indexOf('UserAlreadyAuthenticatedException')) {
-            window.location.href = '/'
+          if (err.message.indexOf("UserAlreadyAuthenticatedException")) {
+            window.location.href = "/";
           }
-          console.log("Error!", err);
+          console.error("Error!", err);
         });
     } catch (error) {
-      if(error.type === 'UserAlreadyAuthenticatedException'){
+      if (error.type === "UserAlreadyAuthenticatedException") {
         window.location.href = "/";
       }
       if (error.code == "UserNotConfirmedException") {
@@ -57,7 +58,7 @@ export default function SigninPage() {
   if (cognitoErrors) {
     return <div className="errors">{cognitoErrors}</div>;
   }
-  
+
   return (
     <article className="signin-article">
       <div className="signin-info">
