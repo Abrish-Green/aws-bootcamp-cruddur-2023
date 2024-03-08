@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#echo "==== db-setup"
+
+bin_path="$(realpath .)/"
+
+source "$bin_path/db-drop"
+source "$bin_path/db-create"
+source "$bin_path/db-schema-load"
+source "$bin_path/db-seed"
