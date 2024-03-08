@@ -1,13 +1,17 @@
-import './HomeFeedPage.css';
+import "./HomeFeedPage.css";
 import React from "react";
 
-import DesktopNavigation  from '../components/DesktopNavigation';
-import DesktopSidebar     from '../components/DesktopSidebar';
-import ActivityFeed from '../components/ActivityFeed';
-import ActivityForm from '../components/ActivityForm';
-import ReplyForm from '../components/ReplyForm';
+import DesktopNavigation from "../components/DesktopNavigation";
+import DesktopSidebar from "../components/DesktopSidebar";
+import ActivityFeed from "../components/ActivityFeed";
+import ActivityForm from "../components/ActivityForm";
+import ReplyForm from "../components/ReplyForm";
 
-import { getCurrentUser } from 'aws-amplify/auth';
+import {
+  getCurrentUser,
+  fetchUserAttributes,
+  fetchAuthSession,
+} from "aws-amplify/auth";
 
 export default function HomeFeedPage() {
   const [activities, setActivities] = React.useState([]);
@@ -16,73 +20,78 @@ export default function HomeFeedPage() {
   const [replyActivity, setReplyActivity] = React.useState({});
   const [user, setUser] = React.useState(null);
   const dataFetchedRef = React.useRef(false);
-  
+
   const loadData = async () => {
     try {
-      const backend_url = `${process.env.REACT_APP_BACKEND_URL}/api/activities/home`
+      const backend_url = `${process.env.REACT_APP_BACKEND_URL}/api/activities/home`;
       const res = await fetch(backend_url, {
-        method: "GET"
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        method: "GET",
       });
+
       let resJson = await res.json();
       if (res.status === 200) {
-        setActivities(resJson)
+        setActivities(resJson);
       } else {
-        console.log(res)
+        console.log(res);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
-
+  console.log();
   const checkAuth = async () => {
     getCurrentUser({
-      // Optional, By default is false. 
-      // If set to true, this call will send a 
+      // Optional, By default is false.
+      // If set to true, this call will send a
       // request to Cognito to get the latest user data
-      bypassCache: false 
+      bypassCache: false,
     })
-    .then((user) => {
-      console.log('user',user);
-      return getCurrentUser()
-    }).then((cognito_user) => {
+      .then((user) => {
+        fetchUserAttributes();
+        return fetchUserAttributes();
+      })
+      .then((cognito_user) => {
         setUser({
-          display_name: cognito_user.attributes.name,
-          handle: cognito_user.attributes.preferred_username
-        })
-    })
-    .catch((err) => console.log(err));
+          display_name: cognito_user.name,
+          handle: cognito_user.preferred_username,
+        });
+      })
+      .catch((err) => console.error(err));
   };
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     //prevents double call
     if (dataFetchedRef.current) return;
     dataFetchedRef.current = true;
 
     loadData();
     checkAuth();
-  }, [])
+  }, []);
 
   return (
     <article>
-      <DesktopNavigation user={user} active={'home'} setPopped={setPopped} />
-      <div className='content'>
-        <ActivityForm  
+      <DesktopNavigation user={user} active={"home"} setPopped={setPopped} />
+      <div className="content">
+        <ActivityForm
           popped={popped}
-          setPopped={setPopped} 
-          setActivities={setActivities} 
+          setPopped={setPopped}
+          setActivities={setActivities}
         />
-        <ReplyForm 
-          activity={replyActivity} 
-          popped={poppedReply} 
-          setPopped={setPoppedReply} 
-          setActivities={setActivities} 
-          activities={activities} 
+        <ReplyForm
+          activity={replyActivity}
+          popped={poppedReply}
+          setPopped={setPoppedReply}
+          setActivities={setActivities}
+          activities={activities}
         />
-        <ActivityFeed 
-          title="Home" 
-          setReplyActivity={setReplyActivity} 
-          setPopped={setPoppedReply} 
-          activities={activities} 
+        <ActivityFeed
+          title="Home"
+          setReplyActivity={setReplyActivity}
+          setPopped={setPoppedReply}
+          activities={activities}
         />
       </div>
       <DesktopSidebar user={user} />

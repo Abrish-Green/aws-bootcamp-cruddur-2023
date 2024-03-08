@@ -24,7 +24,7 @@ export default function ConfirmationPage() {
   const resend_code = async (event) => {
     setCognitoErrors("");
     try {
-      await resendSignUpCode(email);
+      await resendSignUpCode('abrham', email);
       console.log("code resent successfully");
       setCodeSent(true);
     } catch (err) {
@@ -45,10 +45,19 @@ export default function ConfirmationPage() {
   const onsubmit = async (event) => {
     event.preventDefault();
     setCognitoErrors('')
+    console.log('....')
     try {
-      await confirmSignUp(email, code);
-      window.location.href = "/"
+      const { isSignUpComplete, nextStep } = await confirmSignUp({
+        username: email,
+        confirmationCode: code
+      });
+    
+      if(isSignUpComplete){
+        window.location.href = "/"
+      }
+      console.log(isSignUpComplete, nextStep)
     } catch (error) {
+      console.log(error)
       setCognitoErrors(error.message)
     }
     return false

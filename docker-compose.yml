@@ -2,14 +2,20 @@ version: "3.8"
 services:
   backend-flask:
     environment:
+      CONNECTION_URL: "postgresql://postgres:password@postgres:5432"
       FLASK_ENV: development
       FRONTEND_URL: http://localhost:3000
       BACKEND_URL: http://localhost:4567
+      AWS_COGNITO_USER_POOL_ID: "us-east-1_um2Q5srdh"
+      AWS_COGNITO_USER_POOL_CLIENT_ID: "3jg5rdejv4ael47hvjsnoborii"
+      AWS_DEFAULT_REGION: "us-east-1"
     build: ./backend-flask
     ports:
       - "4567:4567"
     volumes:
       - ./backend-flask:/backend-flask
+    depends_on:
+      - postgres
   frontend-react-js:
     environment:
       REACT_APP_BACKEND_URL: http://localhost:4567
@@ -39,6 +45,9 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: cruddur
+    ports:
+      - 5433:5432
 networks:
   internal-network:
     driver: bridge
