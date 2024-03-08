@@ -15,4 +15,4 @@ else
 fi
 
 
-psql $CON_URL $URL curddur < $schema_path
+psql $CON_URL curddur < $schema_path

@@ -16,6 +16,7 @@ def query_wrap_array(template):
   ) array_row);
   """
   return sql
+  
 
 connection_url = os.getenv("CONNECTION_URL")
 print(connection_url)
